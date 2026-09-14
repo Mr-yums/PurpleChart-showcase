@@ -16,6 +16,18 @@ docker compose up -d --build
 
 Ouvrir **http://127.0.0.1:8948/**. Arrêt : `docker compose down`. Relance : `docker compose up -d`. Aucun compte, abonnement ni clé API requis. Le port est lié à la machine locale ; ce dépôt ne fournit pas d’hébergement Internet permanent.
 
+## Image prête à lancer
+
+Une image **Linux amd64 (x86-64)** est disponible dans la [release 0.1.0](https://github.com/Mr-yums/PurpleChart-showcase/releases/tag/v0.1.0), avec `compose.download.yaml` et `SHA256SUMS`. Après téléchargement des trois fichiers dans le même dossier :
+
+```sh
+sha256sum -c SHA256SUMS
+docker load -i purplechart-showcase-0.1.0-linux-amd64.tar.gz
+docker compose -f compose.download.yaml up -d
+```
+
+Même adresse : http://127.0.0.1:8948/. Arrêt : `docker compose -f compose.download.yaml down`. Relance : `docker compose -f compose.download.yaml up -d`. Sur ARM, construire depuis les sources plutôt qu’utiliser cette archive amd64. Ne pas lancer les deux variantes simultanément sur le même port.
+
 ## Trois modules publics
 
 - **Marché** : deux instruments fictifs NQ/ES, chandeliers, volumes et moyenne mobile simple à 12 périodes. Tous les prix sont générés mathématiquement dans le navigateur.
