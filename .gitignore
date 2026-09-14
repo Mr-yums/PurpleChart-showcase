@@ -1,0 +1,8 @@
+# [Sol]
+.env*
+*.key
+*.pem
+*.log
+*.db
+node_modules/
+/demo

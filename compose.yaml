@@ -1,0 +1,14 @@
+# [Sol] Loopback by default; isolated runtime, no volumes or credentials.
+services:
+  demo:
+    build: .
+    ports:
+      - "127.0.0.1:8948:8080"
+    read_only: true
+    user: "65532:65532"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 32
+    mem_limit: 64m
+    cpus: 0.5
+    restart: unless-stopped

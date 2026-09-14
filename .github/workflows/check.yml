@@ -1,0 +1,24 @@
+# [Sol] Public demo checks only; no credentials or broker services.
+name: Demo checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - run: go test ./...
+      - run: docker build -t purplechart-demo .
+      - name: Verify isolated demo
+        shell: bash
+        run: |
+          docker network create showcase-test
+          docker run -d --name demo --network showcase-test --read-only --cap-drop ALL --security-opt no-new-privileges:true -p 127.0.0.1:8948:8080 purplechart-demo
+          trap 'docker rm -f demo; docker network rm showcase-test' EXIT
+          curl --retry 10 --retry-connrefused --retry-delay 1 --fail http://127.0.0.1:8948/healthz
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8948/api/orders)" = 404
