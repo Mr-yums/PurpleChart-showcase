@@ -26,10 +26,12 @@ Le ZIP automatique « Source code » de GitHub ne contient pas les bases de marc
 
 ```sh
 sha256sum -c SHA256SUMS
-tar -xzf purple-replay-1.2.0.tar.gz
+tar -xzpf purple-replay-1.2.0.tar.gz
 cd purple-replay
 docker compose up -d --build
 ```
+
+L’option `p` de `tar` conserve les permissions du paquet, nécessaires aux conteneurs sans privilège, même si votre terminal utilise un `umask` restrictif.
 
 Ouvrez **http://127.0.0.1:8948/**. Si ce port est occupé :
 
