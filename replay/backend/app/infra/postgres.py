@@ -1,13 +1,31 @@
 """Bounded shared PostgreSQL connections for all visitor workspaces."""
 
-from functools import lru_cache
+import atexit
+import threading
 
 from psycopg_pool import ConnectionPool
 
+_pools = {}
+_lock = threading.Lock()
 
-@lru_cache(maxsize=4)
+
 def pool(dsn):
-    return ConnectionPool(dsn, min_size=1, max_size=12, timeout=15, kwargs={"autocommit": True})
+    with _lock:
+        if dsn not in _pools:
+            _pools[dsn] = ConnectionPool(
+                dsn, min_size=1, max_size=12, timeout=15, kwargs={"autocommit": True}
+            )
+        return _pools[dsn]
+
+
+def close_pools():
+    with _lock:
+        for connection_pool in _pools.values():
+            connection_pool.close()
+        _pools.clear()
+
+
+atexit.register(close_pools)
 
 
 class Rows:

@@ -12,19 +12,21 @@ context.on('request',r=>{if(new URL(r.url()).origin!==new URL(base).origin)outbo
 page.on('websocket',ws=>{if(new URL(ws.url()).host!==new URL(base).host)outbound.push(ws.url());});
 page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
 await page.goto(base);await page.waitForFunction(()=>document.querySelector('[aria-label="Séance à charger"]')?.options.length>0);
+// Poll asynchronous API conditions explicitly: never treat a Promise as a true condition.
+const waitApi=async predicate=>{const deadline=Date.now()+60000;while(Date.now()<deadline){if(await page.evaluate(predicate))return;await new Promise(resolve=>setTimeout(resolve,100));}throw new Error('API condition timed out');};
 const get=path=>page.evaluate(async path=>{const r=await fetch(path);if(!r.ok)throw Error(`${r.status} ${path}`);return r.json()},path);
 const sessions=(await get('/api/replay/sessions')).sessions;
 const chosen=[...sessions].reverse().find(s=>s.symbol==='NQ'&&s.source==='v2')||sessions.find(s=>s.symbol==='NQ')||sessions[0];
 const idx=[...sessions].reverse().findIndex(s=>s.symbol===chosen.symbol&&s.session_start===chosen.session_start&&s.source===chosen.source);
 await page.getByLabel('Séance à charger').selectOption(String(idx));
 const stamp=Math.max(chosen.first_ts+60,Math.min(Date.parse(chosen.date+'T15:30:00Z')/1000,chosen.last_ts-60));await page.locator('input[type="time"]').fill(new Date(stamp*1000).toISOString().slice(11,16));const loadedResponse=page.waitForResponse(r=>r.url().endsWith('/api/replay/load')&&r.request().method()==='POST');await page.getByRole('button',{name:'Charger',exact:true}).click();assert((await loadedResponse).ok());
-await page.waitForFunction(async()=>{const s=await(await fetch('/api/replay/status')).json();return s.loaded});await page.waitForFunction(()=>!document.querySelector('.market-chart__message'),{},{timeout:60000});await page.waitForTimeout(300);
+await waitApi(async()=>{const s=await(await fetch('/api/replay/status')).json();return s.loaded});await page.waitForFunction(()=>!document.querySelector('.market-chart__message'),{},{timeout:60000});await page.waitForTimeout(300);
 const initial=await get('/api/replay/status');console.log('initial',JSON.stringify(initial));assert(initial.loaded&&!initial.playing);assert(Math.abs(initial.cursor_ts-stamp)<61);
 const gamma=await get(`/api/gex/levels?symbol=NQ&from=${stamp-7200}&to=${stamp}`);assert(gamma.levels.length>0);assert(gamma.levels.every(l=>l.time<=initial.cursor_ts));
 await page.getByRole('button',{name:'Lecture',exact:true}).click();await page.waitForTimeout(1500);await page.getByRole('button',{name:'Pause',exact:true}).click();assert((await get('/api/replay/status')).cursor_ts>initial.cursor_ts);
 await page.getByRole('button',{name:'Indicateurs',exact:true}).click();assert(await page.getByText('Profil de séance',{exact:true}).isVisible());assert(!/Valentini|Dominance|Absorptions|Stacked/.test(await page.locator('body').innerText()));await page.getByRole('button',{name:'Fermer les indicateurs'}).click();
-await page.getByRole('button',{name:'Achat',exact:true}).click();await page.getByRole('button',{name:/CONFIRMER ×/}).click();await page.waitForFunction(async()=>(await(await fetch('/api/paper/positions')).json()).positions?.length>0);
-await page.getByRole('button',{name:'Tout fermer',exact:true}).click();await page.getByRole('button',{name:'Confirmer',exact:true}).click();await page.waitForFunction(async()=>(await(await fetch('/api/edge/journal')).json()).trades.length>0);
+await page.getByRole('button',{name:'Achat',exact:true}).click();await page.getByRole('button',{name:/CONFIRMER ×/}).click();await waitApi(async()=>(await(await fetch('/api/paper/positions')).json()).positions?.length>0);
+await page.getByRole('button',{name:'Tout fermer',exact:true}).click();await page.getByRole('button',{name:'Confirmer',exact:true}).click();await waitApi(async()=>(await(await fetch('/api/edge/journal')).json()).trades.length>0);
 await page.getByRole('button',{name:'Journal',exact:true}).click();assert(await page.getByRole('heading',{name:'📓 Journal de trading'}).isVisible());assert((await get('/api/edge/journal')).trades.length>0);
 const journal=await get('/api/journal?all=1');assert(journal.trades.length>0);assert(journal.trades.every(t=>t.source==='replay'));
 await page.evaluate(async()=>{const r=await fetch('/api/journal/sessions/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({label:'Exercice de démonstration'})});if(!r.ok)throw Error('Session save failed');});

@@ -26,7 +26,7 @@ from app.bootstrap import build_container
 from app.core.config import AppConfig, settings
 from app.core.exceptions import DomainError
 from app.core.logging import get_logger, setup_logging
-from app.infra.postgres import pool
+from app.infra.postgres import close_pools, pool
 from app.visitor_workspaces import VisitorWorkspaces, WorkspaceRegistry
 
 VERSION = "1.2.0"
@@ -58,6 +58,7 @@ def create_app(config: AppConfig | None = None) -> FastAPI:
                 await registry.shutdown()
             await container.replay.shutdown()
             await container.hub.close_all()
+            await asyncio.to_thread(close_pools)
             log.info("Arrêt PurpleReplay v2")
 
     app = FastAPI(

@@ -54,4 +54,6 @@ with psycopg.connect(admin,autocommit=True) as c:
         c.execute("DELETE FROM modern.tape_trades WHERE t=4102444800 AND id LIKE 'integration-%%'")
         c.execute('DELETE FROM simulation.records WHERE workspace=%s',(workspace,))
         c.execute('DELETE FROM simulation.documents WHERE workspace=%s',(workspace,))
+from app.infra.postgres import close_pools
+close_pools()
 print('PASS: Go/PostgreSQL parity, tied ticks, simulation persistence, visitor separation and database role restrictions')
