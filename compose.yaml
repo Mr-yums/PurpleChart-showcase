@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     healthcheck:
-      test: [CMD-SHELL, "pg_isready -U postgres -d replay"]
+      test: [CMD-SHELL, "pg_isready -h 127.0.0.1 -U postgres -d replay"]
       interval: 5s
       timeout: 3s
       retries: 60
@@ -42,6 +42,8 @@ services:
     build: .
     image: purple-replay:1.2.0
     entrypoint: [python, /app/import-market.py]
+    healthcheck:
+      disable: true
     environment:
       IMPORT_DSN: postgresql://postgres:demo-install-only@database/replay
     volumes:
