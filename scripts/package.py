@@ -32,6 +32,18 @@ out.mkdir(exist_ok=True)
 archive = out / f"purple-replay-{version}.tar.gz"
 temporary = archive.with_suffix(".tmp")
 with tarfile.open(temporary, "w:gz", compresslevel=1) as tar:
+    directories = {"purple-replay"}
+    for name in files:
+        directories.update(
+            "purple-replay/" + str(parent)
+            for parent in Path(name).parents
+            if str(parent) != "."
+        )
+    for name in sorted(directories):
+        info = tarfile.TarInfo(name)
+        info.type = tarfile.DIRTYPE
+        info.mode = 0o755
+        tar.addfile(info)
     for name in sorted(files):
         path = root / name
         info = tar.gettarinfo(path, arcname="purple-replay/" + name)
