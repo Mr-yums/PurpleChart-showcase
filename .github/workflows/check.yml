@@ -24,6 +24,9 @@ jobs:
       - name: Check runtime isolation
         run: |
           docker compose -p purple-replay-ci exec -T replay python -c "import importlib.util; assert not importlib.util.find_spec('httpx'); assert not importlib.util.find_spec('pytest'); routes=open('/proc/net/route').readlines()[1:]; assert not any(r.split()[1]=='00000000' for r in routes)"
+      - name: Diagnostic logs
+        if: failure()
+        run: docker compose -p purple-replay-ci logs --tail=80
       - name: Cleanup test installation
         if: always()
         run: docker compose -p purple-replay-ci down -v

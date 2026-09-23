@@ -3,8 +3,6 @@ services:
   replay:
     build: .
     image: purple-replay:1.1.0
-    ports:
-      - "127.0.0.1:${PURPLE_REPLAY_PORT:-8948}:8080"
     volumes:
       - ./data:/market:ro
       - journals:/state
@@ -17,7 +15,28 @@ services:
     security_opt: [no-new-privileges:true]
     tmpfs:
       - /tmp:rw,nosuid,nodev,noexec,size=128m
+  gateway:
+    image: nginxinc/nginx-unprivileged:1.29-alpine@sha256:0c79d56aee561a1d81c63f00eee5fb5fe29279560cdc55e91425133104c7fbe6
+    entrypoint: ["nginx", "-c", "/etc/nginx/nginx.conf", "-g", "daemon off;"]
+    ports:
+      - "127.0.0.1:${PURPLE_REPLAY_PORT:-8948}:8080"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks: [front, replay]
+    depends_on:
+      replay:
+        condition: service_healthy
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    sysctls:
+      net.ipv4.ip_forward: "0"
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,noexec,size=32m
 networks:
+  front:
+    driver: bridge
   replay:
     driver: bridge
     internal: true

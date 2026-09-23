@@ -96,3 +96,11 @@ limitée aux ressources de l’instance. Les données de marché sont en lecture
 Le lockfile impose `@types/estree` 1.0.9 : les dépendances demandaient une version
 1.1.0 absente du registre lors du contrôle. Svelte-check et le build valident cette
 configuration. Aucun client HTTP externe n’est installé dans le runtime.
+
+### Accès local au réseau isolé
+
+Le conteneur replay n’a pas de route par défaut. Une passerelle nginx publie
+uniquement le port localhost et transmet HTTP/WebSocket vers `replay:8080`.
+Le routage IP est désactivé dans la passerelle ; la destination du proxy est fixe.
+Cela conserve l’accès navigateur sans raccorder le moteur à un réseau externe.
+Voir la [documentation réseau Docker](https://docs.docker.com/engine/network/).

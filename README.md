@@ -34,10 +34,12 @@ docker compose logs -f    # journaux techniques
 
 Les archives sont montées en lecture seule. Le volume `journals` contient les espaces et journaux d’entraînement ; ne pas supprimer ce volume pour conserver ses exercices. Chaque navigateur reçoit un espace distinct via un cookie. Effacer ce cookie ouvre un nouvel espace. Une fenêtre privée permet de tester un autre compte. Au maximum 16 espaces peuvent être chargés simultanément ; les espaces inactifs sont libérés après 30 minutes tout en conservant leurs fichiers. La fermeture du dernier onglet met la lecture en pause. Un arrêt normal du conteneur sauvegarde le curseur et le compte ; **Reprendre** restaure la séance en pause.
 
-Le port HTTP est lié à `127.0.0.1`. Le réseau Docker est interne, sans route par défaut
+Le port HTTP est lié à `127.0.0.1`. Le moteur est sur un réseau Docker interne, sans route par défaut
 vers Internet ; les archives sont locales et montées en lecture seule. Le programme
 ne contient aucun connecteur broker, aucune connexion Topstep ni champ de clé API.
 Le journal contient exclusivement les exercices créés par son utilisateur.
+Une passerelle nginx locale transmet uniquement vers le moteur : pas de proxy
+vers une adresse choisie par le visiteur, ni de routage IP entre ses réseaux.
 Le navigateur ne charge que les ressources de cette installation (politique CSP).
 Les liens vers GitHub sont ouverts uniquement à la demande de l’utilisateur.
 
