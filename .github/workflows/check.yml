@@ -10,6 +10,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.14'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: market-go/go.mod
+          cache-dependency-path: market-go/go.sum
+      - run: cd market-go && go test -race ./...
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -19,6 +24,7 @@ jobs:
       - run: .venv/bin/python scripts/ci-data.py
       - run: PURPLE_REPLAY_PORT=18948 docker compose -p purple-replay-ci up -d --build
       - run: python scripts/check-install.py http://127.0.0.1:18948
+      - run: docker compose -p purple-replay-ci exec -T -e TEST_ADMIN_DSN=postgresql://postgres:demo-install-only@database/replay replay python < scripts/check-postgres.py
       - run: cd frontend && npx playwright install --with-deps chromium
       - run: REPLAY_URL=http://127.0.0.1:18948 node scripts/check-browser.mjs
       - name: Check runtime isolation

@@ -6,11 +6,14 @@ relais), handlers d'erreurs centralisés. Même patron que PurpleChart v2 (backe
 
 from __future__ import annotations
 
+import asyncio
+import json
 import os
 import shutil
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncGenerator
+from urllib.request import urlopen
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,9 +26,10 @@ from app.bootstrap import build_container
 from app.core.config import AppConfig, settings
 from app.core.exceptions import DomainError
 from app.core.logging import get_logger, setup_logging
+from app.infra.postgres import pool
 from app.visitor_workspaces import VisitorWorkspaces, WorkspaceRegistry
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 
 
 def create_app(config: AppConfig | None = None) -> FastAPI:
@@ -89,7 +93,21 @@ def create_app(config: AppConfig | None = None) -> FastAPI:
     @app.get("/api/health")
     async def health(request: Request) -> dict:
         c = request.app.state.container
+        stack = {"market": "sqlite", "ticks": "python", "journal": "local"}
+        if c.config.data.market_dsn:
+
+            def check_stack():
+                with pool(c.config.data.market_dsn).connection() as connection:
+                    assert connection.execute("SELECT count(*) FROM public.market_imports").fetchone()[0] == 2
+                with pool(c.config.data.state_dsn).connection() as connection:
+                    connection.execute("SELECT 1 FROM simulation.documents LIMIT 1")
+                with urlopen(c.config.data.tick_url + "/health", timeout=3) as response:
+                    assert json.load(response)["status"] == "ok"
+
+            await asyncio.to_thread(check_stack)
+            stack = {"market": "postgresql", "ticks": "go", "journal": "postgresql"}
         return {
+            "stack": stack,
             "status": "ok",
             "version": VERSION,
             "archive": "ok" if c.config.data.archive.exists() else "missing",

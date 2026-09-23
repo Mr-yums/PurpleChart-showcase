@@ -1,0 +1,15 @@
+CREATE ROLE market_reader LOGIN PASSWORD 'demo-market-local';
+CREATE ROLE replay_writer LOGIN PASSWORD 'demo-journal-local';
+CREATE SCHEMA legacy;
+CREATE SCHEMA modern;
+CREATE SCHEMA simulation;
+CREATE TABLE public.market_imports (source text PRIMARY KEY, sha256 text NOT NULL, ticks bigint NOT NULL);
+CREATE TABLE simulation.records (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, workspace text NOT NULL, kind text NOT NULL, payload jsonb NOT NULL);
+CREATE INDEX records_workspace_kind ON simulation.records(workspace,kind,id);
+CREATE TABLE simulation.documents (workspace text NOT NULL, kind text NOT NULL, payload jsonb NOT NULL, PRIMARY KEY(workspace,kind));
+GRANT USAGE ON SCHEMA legacy,modern TO market_reader;
+ALTER DEFAULT PRIVILEGES IN SCHEMA legacy,modern GRANT SELECT ON TABLES TO market_reader;
+GRANT SELECT ON public.market_imports TO market_reader;
+GRANT USAGE ON SCHEMA simulation TO replay_writer;
+GRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA simulation TO replay_writer;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA simulation TO replay_writer;

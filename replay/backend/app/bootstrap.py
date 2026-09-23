@@ -14,6 +14,8 @@ from app.repositories.archive_repository import ArchiveRepository
 from app.repositories.edge_journal_repository import EdgeJournalRepository
 from app.repositories.gex_repository import GexRepository
 from app.repositories.jsonl_repository import JsonFileRepository, JsonlRepository
+from app.repositories.postgres_market import PostgresArchive, PostgresGamma
+from app.repositories.postgres_state import PostgresDocument, PostgresEdge, PostgresRecords
 from app.repositories.v2_archive_repository import ArchiveSources, GammaSources
 from app.services.edge_service import EdgeService
 from app.services.gex_service import GexService
@@ -56,6 +58,22 @@ def build_container(config: AppConfig) -> Container:
     demo_repo = JsonlRepository(data.demo_trades)
     sessions_repo = JsonlRepository(data.sessions)
 
+    checkpoint_repo = JsonFileRepository(data.data_dir / "pcv2_replay_checkpoint.json")
+    if data.market_dsn:
+        archive = ArchiveSources(
+            PostgresArchive(data.archive, data.market_dsn, "legacy", data.tick_url),
+            PostgresArchive(modern_path, data.market_dsn, "modern", data.tick_url),
+        )
+        importer = LocalArchive(archive.modern)
+        gex_repo = GammaSources(
+            archive, PostgresGamma(data.market_dsn, "legacy"), PostgresGamma(data.market_dsn, "modern")
+        )
+        workspace = data.data_dir.name
+        edge_repo = PostgresEdge(data.state_dsn, workspace)
+        demo_repo = PostgresRecords(data.state_dsn, workspace, "trades")
+        sessions_repo = PostgresRecords(data.state_dsn, workspace, "sessions")
+        checkpoint_repo = PostgresDocument(data.state_dsn, workspace, "checkpoint")
+
     engine = ReplayEngine(config.replay, hub)
     market = MarketService(
         archive, config.replay, engine, JsonFileRepository(data.sessions_cache), catalogue=importer
@@ -80,7 +98,7 @@ def build_container(config: AppConfig) -> Container:
         hub,
         relay_factory,
         paper,
-        checkpoint_repo=JsonFileRepository(data.data_dir / "pcv2_replay_checkpoint.json"),
+        checkpoint_repo=checkpoint_repo,
     )
     regimes_service = RegimesService(
         JsonFileRepository(data.regimes),

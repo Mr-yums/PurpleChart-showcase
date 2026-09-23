@@ -2,7 +2,14 @@ name: purple-replay
 services:
   replay:
     build: .
-    image: purple-replay:1.1.0
+    image: purple-replay:1.2.0
+    environment:
+      PR_MARKET_DSN: postgresql://market_reader:demo-market-local@database/replay
+      PR_STATE_DSN: postgresql://replay_writer:demo-journal-local@database/replay
+      PR_TICK_URL: http://market:8090
+    depends_on:
+      market:
+        condition: service_healthy
     volumes:
       - ./data:/market:ro
       - journals:/state
@@ -15,6 +22,50 @@ services:
     security_opt: [no-new-privileges:true]
     tmpfs:
       - /tmp:rw,nosuid,nodev,noexec,size=128m
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: replay
+      POSTGRES_PASSWORD: demo-install-only
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks: [replay]
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U postgres -d replay"]
+      interval: 5s
+      timeout: 3s
+      retries: 60
+  import-market:
+    build: .
+    image: purple-replay:1.2.0
+    entrypoint: [python, /app/import-market.py]
+    environment:
+      IMPORT_DSN: postgresql://postgres:demo-install-only@database/replay
+    volumes:
+      - ./data:/market:ro
+    networks: [replay]
+    depends_on:
+      database:
+        condition: service_healthy
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  market:
+    build: ./market-go
+    image: purple-replay-market:1.2.0
+    environment:
+      MARKET_DSN: postgresql://market_reader:demo-market-local@database/replay
+    networks: [replay]
+    depends_on:
+      import-market:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
   gateway:
     image: nginxinc/nginx-unprivileged:1.29-alpine@sha256:0c79d56aee561a1d81c63f00eee5fb5fe29279560cdc55e91425133104c7fbe6
     entrypoint: ["nginx", "-c", "/etc/nginx/nginx.conf", "-g", "daemon off;"]
@@ -42,3 +93,4 @@ networks:
     internal: true
 volumes:
   journals:
+  postgres:

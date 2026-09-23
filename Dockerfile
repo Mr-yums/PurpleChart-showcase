@@ -13,6 +13,7 @@ WORKDIR /app
 COPY replay/backend/requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt && useradd --uid 10001 --create-home replay && mkdir /state /market && chown replay:replay /state
 COPY --chown=replay:replay replay/backend/app /app/app
+COPY --chown=replay:replay scripts/import-market.py /app/import-market.py
 COPY --from=frontend-build --chown=replay:replay /build/frontend/dist /web
 ENV PR_DATA_DIR=/state PR_ARCHIVE_PATH=/market/replay_archive.sqlite PR_GEX_PATH=/market/gex_qqq.db PR_MODERN_ARCHIVE=/market/purplechart_v2_archive.sqlite PR_REGIMES_PATH=/market/regimes.json PR_REPLAY_MIN_SYMBOL_ROWS=1 PR_VISITOR_WORKSPACES=1 PR_WEB_DIR=/web
 USER replay

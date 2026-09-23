@@ -20,6 +20,10 @@ class DataConfig(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="PR_", env_file=_ENV_FILE, extra="ignore")
 
+    market_dsn: str = ""
+    state_dsn: str = ""
+    tick_url: str = "http://market:8090"
+
     data_dir: Path = Field(default=Path("/state"))
     archive_path: Path | None = Field(default=None)
     modern_archive_path: Path = Field(

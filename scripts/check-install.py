@@ -19,6 +19,7 @@ else:
 version = json.loads(
     (Path(__file__).resolve().parents[1] / "frontend/package.json").read_text()
 )["version"]
+assert health["stack"] == {"market": "postgresql", "ticks": "go", "journal": "postgresql"}
 assert health["version"] == version and health["archive"] == "ok"
 with urllib.request.urlopen(base, timeout=5) as r:
     assert r.status == 200

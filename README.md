@@ -1,89 +1,99 @@
-# PurpleChart Showcase · Purple Replay
+# PurpleChart Showcase — Purple Replay 1.2.0
 
-Clone autonome de la partie replay de PurpleChart V2 : entraînement sur des transactions futures historiques, avec compte et ordres simulés. Le code du moteur, du graphique, du journal et des outils de replay provient du module original, adapté pour Docker.
+**Démo Docker d’entraînement : Go + Python + PostgreSQL, interface Svelte/TypeScript.**
+Rejouez des séances historiques, passez des ordres simulés et consultez votre journal.
+Aucune clé API, aucun compte Topstep et aucune connexion à un broker ne sont nécessaires.
 
-![Replay sur une séance historique, compte simulé](docs/showcase.png)
+![Interface de replay et compte simulé](docs/showcase.png)
 
-## Utiliser
+## Technologies réellement utilisées
 
-1. Choisir une séance et une heure UTC, puis **Charger**.
-2. Choisir la vitesse, puis **Lecture** / **Pause**.
-3. Régler contrats, risque et ratio ; choisir **Achat** ou **Vente**, ajuster les lignes SL/TP, puis confirmer.
-4. Utiliser **Tout fermer**, la clôture partielle ou **Stop à zéro**. Le dernier exige une position en gain.
-5. Consulter **Journal** et **Performance**, et enregistrer une session d’entraînement.
+| Technologie | Rôle dans cette démo |
+|---|---|
+| **Go** | Service `market` : lit les ticks historiques dans PostgreSQL et fournit les lots au moteur Python. Préserve tous les ticks partageant le dernier timestamp d’un lot. |
+| **Python / FastAPI** | API HTTP/WebSocket, horloge de replay, calculs, ordres simulés, journal et performances. Interroge aussi PostgreSQL pour le contexte historique et les bougies. |
+| **PostgreSQL 17** | Stocke les ticks et niveaux gamma importés, les trades simulés, les échantillons de performance, les séances sauvegardées et les points de reprise. Volume Docker persistant. |
+| **Svelte / TypeScript** | Interface, graphiques et interactions. Compilés avec Vite ; Node intervient uniquement au build. |
+| **nginx / Docker Compose** | Point d’accès local et orchestration des services isolés. |
+| SQLite | **Format de transport des archives de marché uniquement dans Docker** : importé au premier lancement. Les adaptateurs SQLite restent disponibles pour les tests unitaires et le développement hors Docker. |
 
-Les bougies, le tape, le delta cumulé, les profils de volume et les niveaux gamma sont bornés au curseur. Le catalogue décrit rétrospectivement des blocs horaires : efficiency ratio ≥ 0,6 pour un mouvement directionnel, ≤ 0,2 pour un range, mixte entre les deux. Cette description simple remplace le classifieur privé et ne prédit rien. Le DOM présente les volumes exécutés, pas un carnet d’ordres historique reconstruit.
+Le V2 privé utilise Go pour la collecte live. **Cette édition publique utilise un service Go historique dédié**, sans reprendre le connecteur Topstep/ProjectX. Elle présente une architecture multilangage fonctionnelle, pas une copie intégrale du V2 de production. La version 1.1.0 utilisait Python/SQLite ; 1.2.0 introduit réellement Go/PostgreSQL.
 
-EMA20/50, VWAP Globex/RTH et bandes, volume profile de séance et mesure de plage sont conservés. Gamma PW/CW/FL disponible sur NQ/MNQ lorsque l’archive le permet : projection indicative depuis le sous-jacent historique (ratio) ou NDX (base future observée), avec le dernier prix du future connu à la date du snapshot. Le signe gamma n’est pas une garantie de comportement du marché.
+## Installation avec les séances
 
-Les bulles/classifications orderflow privées, dominances, stratégies et overlays Valentini, ainsi que les niveaux vanna privés, ne font pas partie de cette édition. Aucun trade, journal personnel, annotation ou identifiant de compte de l’auteur n’est fourni.
-
-## Docker
-
-Le paquet inclut les données dans `data/` et les sources. Docker recompile le frontend depuis les sources avec `npm ci`, vérifie Svelte, puis assemble le runtime Python avec dépendances figées. Node et les outils de build restent dans une étape séparée, absente de l’image finale.
+Téléchargez le paquet complet depuis la [release 1.2.0](https://github.com/Mr-yums/PurpleChart-showcase/releases/tag/v1.2.0), ainsi que `SHA256SUMS`.
+Le ZIP automatique « Source code » de GitHub ne contient pas les bases de marché.
 
 ```sh
+sha256sum -c SHA256SUMS
+tar -xzf purple-replay-1.2.0.tar.gz
+cd purple-replay
 docker compose up -d --build
 ```
 
-Ouvrir `http://127.0.0.1:8948/`. Pour choisir un autre port : `PURPLE_REPLAY_PORT=8950 docker compose up -d`.
+Ouvrez **http://127.0.0.1:8948/**. Si ce port est occupé :
 
 ```sh
-docker compose stop       # arrêt, journaux conservés
-docker compose start      # relance
-docker compose logs -f    # journaux techniques
+PURPLE_REPLAY_PORT=18948 docker compose up -d --build
 ```
 
-Les archives sont montées en lecture seule. Le volume `journals` contient les espaces et journaux d’entraînement ; ne pas supprimer ce volume pour conserver ses exercices. Chaque navigateur reçoit un espace distinct via un cookie. Effacer ce cookie ouvre un nouvel espace. Une fenêtre privée permet de tester un autre compte. Au maximum 16 espaces peuvent être chargés simultanément ; les espaces inactifs sont libérés après 30 minutes tout en conservant leurs fichiers. La fermeture du dernier onglet met la lecture en pause. Un arrêt normal du conteneur sauvegarde le curseur et le compte ; **Reprendre** restaure la séance en pause.
+Le premier démarrage télécharge les images/dépendances puis importe les archives dans PostgreSQL. L’interface démarre après cet import ; comptez plusieurs minutes selon votre disque et processeur. Les archives représentent environ 4,5 Go, auxquels s’ajoutent PostgreSQL, ses index, son journal transactionnel et les images : prévoir **au moins 20 Go libres**. Le paquet complet contient 32 623 604 ticks sur huit symboles, avec des périodes de couverture différentes.
 
-Le port HTTP est lié à `127.0.0.1`. Le moteur est sur un réseau Docker interne, sans route par défaut
-vers Internet ; les archives sont locales et montées en lecture seule. Le programme
-ne contient aucun connecteur broker, aucune connexion Topstep ni champ de clé API.
-Le journal contient exclusivement les exercices créés par son utilisateur.
-Une passerelle nginx locale transmet uniquement vers le moteur : pas de proxy
-vers une adresse choisie par le visiteur, ni de routage IP entre ses réseaux.
-Le navigateur ne charge que les ressources de cette installation (politique CSP).
-Les liens vers GitHub sont ouverts uniquement à la demande de l’utilisateur.
+```sh
+docker compose logs -f import-market
+# Contrôle des services après import
+docker compose ps
+python scripts/check-install.py http://127.0.0.1:8948
+```
 
-## Organisation et validation
+L’import est transactionnel par archive. Une interruption annule l’archive en cours ; la suivante reprend au redémarrage. Les archives déjà importées sont reconnues par empreinte. Si le contenu distribué change, l’import refuse de remplacer silencieusement une base existante.
 
-- `replay/backend/app/` : API, moteur, simulation, services et lecteurs d’archives.
-- `replay/frontend/` : vrai workspace replay et composants.
-- `frontend/` : application web autonome et build Vite.
-- `data/` : archives de marché nettoyées et inventaire.
-- `compose.yaml` : service isolé et volume des journaux.
+## Utilisation et persistance
 
-Développement : `npm ci --prefix frontend`, `npm run check --prefix frontend`, `npm run build --prefix frontend`. Tests Python depuis `replay/backend` après installation de `requirements-dev.txt` : `python -m pytest -q`. Tests front : `node --test replay/frontend/tests/domain.test.cjs`.
+1. Choisir un instrument et une séance, puis charger le replay.
+2. Lire, mettre en pause, changer la vitesse et examiner les graphiques.
+3. Placer et clôturer des ordres **simulés** ; consulter journal et performances.
+4. Sauvegarder une séance et reprendre ultérieurement depuis le même navigateur.
 
-Les remplissages sont simulés sur les transactions enregistrées : pas de simulation de file d’attente réelle ni de garantie d’exécution broker. Les périodes absentes de l’enregistrement ne sont pas inventées. Les frais sont des paramètres d’entraînement, pas une grille tarifaire tenue à jour.
+Chaque navigateur reçoit un espace indépendant par cookie. Effacer ce cookie change l’espace visible ; ce mécanisme n’est pas une authentification destinée à un service Internet partagé.
+Les séances sauvegardées, trades clôturés et points de reprise sont persistants. Une reprise redémarre en pause ; il ne s’agit pas de restaurer un ordre broker ou de garantir la restauration d’une position encore ouverte.
 
-## Architecture et maintenance
+```sh
+docker compose stop        # arrêt, données conservées
+docker compose start       # relance de l’installation initialisée
+docker compose down        # retire les conteneurs, conserve les volumes
+# ATTENTION : down -v efface aussi PostgreSQL et tous les exercices de cette installation.
+```
 
-La revue détaillée se trouve dans `docs/ARCHITECTURE.md` et dans l’application sur `/architecture.html`. Le backend sépare domaine, repositories, services, assemblage et API. Le front distingue calculs purs (`lib/domain`), stores (`lib/application`), transport et composants.
+**Migration 1.1 → 1.2 :** utiliser un dossier distinct et un nom de projet distinct (`docker compose -p purple-replay-v12 up -d --build`). Les anciens journaux SQLite/JSONL ne sont pas importés automatiquement. Garder l’ancienne installation et ses volumes pour conserver ces exercices. Ne jamais monter la base privée de PurpleChart dans cette démo.
 
-Les fichiers `.in` recensent les dépendances Python directes ; les `.txt` figent les graphes installables. Les outils de test et Ruff restent dans les dépendances de développement. Le runtime Docker ne les installe pas.
+## Isolation et absence de broker
 
-Après `docker compose up -d`, `npm run dev --prefix frontend` utilise le backend local sur 8948. La variable `REPLAY_BACKEND_URL` permet de choisir une autre instance.
+- Aucun connecteur Topstep/ProjectX, aucune route de passage d’ordre réel, aucune clé API à fournir.
+- Archives publiques reconstruites : données de marché sélectionnées, pas de comptes ni d’anciens trades personnels, pas d’événements de stratégie privée.
+- Go, Python et PostgreSQL sont sur un réseau Docker interne ; aucun de leurs ports n’est publié directement. Seul nginx publie le port sur **127.0.0.1**.
+- Go et les lectures Python utilisent un rôle PostgreSQL en lecture seule sur le marché ; le journal utilise un rôle distinct limité aux tables de simulation. Seul le conteneur d’import éphémère utilise le rôle d’administration.
+- Les mots de passe `demo-*` dans Compose/SQL sont des valeurs publiques réservées à cette installation locale isolée, **pas des secrets personnels**. Ne pas exposer cette configuration sur Internet.
+- Le navigateur charge les ressources de l’instance (CSP same-origin). Aucun suivi analytique. Le lien de téléchargement mène à GitHub lorsque vous le choisissez.
 
-## Maintenance
+Le téléchargement et le build nécessitent Internet. Après installation, le replay utilise les données locales ; le test d’isolation vérifie l’absence de route Internet des services internes. Cela ne constitue pas une garantie universelle contre toute vulnérabilité.
 
-`scripts/check` lance les tests et reconstruit l’interface. La documentation web est
-générée depuis `docs/ARCHITECTURE.md`. Ne pas supprimer le volume `journals` lors
-d’une mise à jour. L’application est prévue pour un ordinateur personnel ; ses espaces
-par cookie ne remplacent pas des comptes avec mots de passe sur un serveur public.
+## Vérifications et développement
 
-## Publication
+```sh
+python -m venv .venv
+.venv/bin/pip install -r replay/backend/requirements-dev.txt
+npm ci --prefix frontend
+scripts/check
+(cd market-go && go test -race ./...)
+```
 
-Ce dépôt **PurpleChart-showcase** contient désormais **Purple Replay** : il remplace
-la vitrine 0.1.0 aux cours fictifs par le module d’entraînement sur archives réelles.
-Conception et pilotage : **Mr.yums**, développement assisté par IA.
+La CI génère un petit marché **synthétique** pour vérifier Docker sans télécharger le paquet complet. Elle teste aussi Go/PostgreSQL, les restrictions des rôles, le parcours navigateur et l’absence de requêtes externes. Les tests Python unitaires conservent SQLite comme fixture rapide ; leur réussite seule ne valide pas le déploiement PostgreSQL.
 
-Télécharger [Purple Replay 1.1.0 avec ses données](https://github.com/Mr-yums/PurpleChart-showcase/releases/tag/v1.1.0),
-extraire le paquet puis lancer Docker depuis le dossier `purple-replay`.
-L’installation télécharge les dépendances ; l’utilisation du replay est ensuite locale.
-Les sources Git seules n’incluent pas les grosses bases : utiliser le paquet complet.
-Les archives représentent environ 5 Go une fois extraites.
+Architecture détaillée : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Guide intégré : `/guide.html`.
 
-Les sources privées, comptes et journaux de l’auteur ne sont pas inclus.
-Le code conserve la licence MIT du dépôt (voir `LICENSE`).
-Les droits des dépendances tierces restent ceux de leurs licences respectives.
+## Limites
+
+Simulation à partir de ticks enregistrés : interruptions de collecte conservées, pas de reconstitution de carnet complet ni de garantie d’exécution ou de latence réelle. Frais et remplissages sont ceux du simulateur. Les niveaux gamma disponibles sont historiques et limités à leur couverture. US500 n’est pas inclus. Les profils du catalogue sont rétrospectifs.
+
+Projet de **Mr.yums**. Code sous licence [MIT](LICENSE) ; cette licence du code ne prétend pas accorder des droits supplémentaires sur des données de marché tierces.

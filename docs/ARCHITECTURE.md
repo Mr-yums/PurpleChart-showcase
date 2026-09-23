@@ -1,106 +1,68 @@
-# Revue d’architecture — Purple Replay 1.0.6
+# Architecture de Purple Replay 1.2.0
 
-Revue du 18 septembre 2026, avec corrections et tests exécutés localement.
+## Parcours d’une séance
 
-## Organisation
-
-| Couche | Responsabilité | Dépendances autorisées |
-| --- | --- | --- |
-| `backend/app/domain` | Calculs, compte simulé, horloge et contrats de source | Bibliothèque standard et utilitaires métier de `core` |
-| `backend/app/repositories` | SQLite, JSON et JSONL | Domaine et adaptateurs bas niveau |
-| `backend/app/services` | Orchestration du replay, du marché et du journal | Domaine, contrats ciblés et adaptateurs de stockage |
-| `backend/app/bootstrap.py` | Assemblage explicite d’un conteneur par espace | Implémentations concrètes ; aucun transport FastAPI |
-| `backend/app/api` | Validation et transport HTTP/WebSocket | Schémas et conteneur fourni à la requête |
-| `frontend/lib/domain` | Calculs, types, sizing, profils et études | Aucun store Svelte, transport ou composant |
-| `frontend/lib/application` | État Svelte et orchestration des interactions | Domaine et adaptateurs API/WebSocket |
-| `frontend/lib/api`, `websocket` | Transport navigateur | Types du domaine |
-| `frontend/lib/components` | Affichage et interactions graphiques | Couche application et calculs |
-
-Les calculs sont séparés de la persistance et du transport. Les contrôleurs de graphique restent responsables du rendu ; les stores gèrent la session et les requêtes. Le dossier `frontend/` à la racine contient le point d’entrée Vite et son build ; les composants du module sont dans `replay/frontend/`.
-
-## Principes SOLID appliqués
-
-- **Responsabilité unique :** l’API n’assemble plus les services ; `bootstrap.py` s’en charge. Le catalogue local centralise les séances récentes. Les stores ont quitté le dossier de calculs métier.
-- **Ouverture et substitution :** les deux générations d’archives utilisent la même façade de lecture. Un test vérifie le changement d’archive puis le retour à la première, sans conserver les mauvaises bougies en cache.
-- **Interfaces ciblées :** `services/ports.py` définit les besoins du catalogue, de la projection gamma, de l’historique et du curseur. Le moteur reçoit un `PriceListener` et un chargeur de bougie ; l’outil VP reçoit une interface de dessin minimale.
-- **Injection et encapsulation :** les collaborateurs sont fournis lors de l’assemblage. Le câblage circulaire moteur/marché/ordres passe par une méthode publique, utilisable seulement avant chargement. Aucun module applicatif Python n’accède aux attributs privés d’un autre objet.
-
-SOLID est un ensemble de principes, pas une certification. Certains services historiques gardent des annotations de repositories concrets et les stores utilisent les adaptateurs HTTP partagés. Cette revue ne prétend donc pas à une architecture hexagonale intégrale ni à une preuve formelle de substituabilité. Ces limites sont explicites ; aucune abstraction générale supplémentaire n’a été ajoutée sans besoin.
-
-## Dépendances et déploiement
-
-- `requirements.in` : dépendances Python directes, avec versions.
-- `requirements.txt` : graphe runtime figé, 17 distributions.
-- `requirements-dev.in` et `requirements-dev.txt` : outils de test et de contrôle séparés. HTTPX appartient uniquement aux tests.
-- `frontend/package-lock.json` : graphe npm figé, réinstallable avec `npm ci`. SvelteKit et son adaptateur inutilisés sont retirés.
-- Le conteneur contient Python, ses dépendances runtime, le backend et les fichiers web compilés. Il ne contient ni Node, ni pytest, ni Ruff, ni le client HTTP live supprimé.
-- Les archives restent dans `/market`, en lecture seule. Les journaux restent dans le volume `/state`. Aucun changement de données de marché n’a été nécessaire pour cette revue.
-
-## Vérifications reproductibles
-
-Depuis la racine, après installation des dépendances de développement :
-
-```sh
-.venv/bin/python -m pytest -q replay/backend/tests
-.venv/bin/ruff check replay/backend/app replay/backend/tests
-.venv/bin/ruff format --check replay/backend/app replay/backend/tests
-npm ci --prefix frontend
-npm run check --prefix frontend
-node --test replay/frontend/tests/domain.test.cjs
-npm run build --prefix frontend
+```mermaid
+flowchart LR
+    B[Navigateur Svelte / TypeScript] --> N[nginx localhost]
+    N --> P[Python FastAPI / moteur de replay]
+    P --> G[Go / lots de ticks historiques]
+    G --> D[(PostgreSQL / marché)]
+    P --> D
+    P --> J[(PostgreSQL / simulation)]
+    A[Archives SQLite nettoyées] --> I[Import Python éphémère]
+    I --> D
 ```
 
-53 tests Python et 12 tests front couvrent notamment le moteur, les ordres, l’isolation des espaces, le changement d’archive et les frontières entre couches. Le graphe Python interne est contrôlé sans cycle. Ruff vérifie les imports, erreurs statiques ciblées et le formatage. Ce contrôle ne remplace pas un typage statique complet du backend.
+Python fait avancer l’horloge propre à chaque visiteur. Son lecteur précharge les lots via le service Go interne. Go lit les ticks de PostgreSQL avec un curseur temporel strict et `FETCH FIRST ... WITH TIES` : tous les ticks du dernier instant sont inclus, même si cela dépasse la taille nominale du lot. Il valide source, symbole, borne finie et taille maximale. Il n’a aucun client broker ni mode live.
 
-Deux avertissements de dépréciation proviennent du client de test Starlette/HTTPX et d’AnyIO ; ils ne sont pas masqués. Aucun changement de version de ces bibliothèques n’a été mélangé à cette revue.
+Python lit également les agrégats de marché dans PostgreSQL pour amorcer les bougies, volumes et contexte. Le moteur et les ordres restent en Python. Le service Go historique est propre à la Showcase ; le collecteur live du V2 privé n’est pas distribué.
 
-## Correctif 1.0.2 — compte et gamma
+## Stockage
 
-Le composant compte utilise un calcul de valorisation pur et testé : pas de total inventé lorsque le prix manque, pas de double déduction des frais. `application/GammaStore.ts` fournit une source partagée à la carte et aux lignes gamma. Il suit le symbole et le curseur de la séance chargée, invalide les réponses tardives, efface les niveaux au retour en arrière et retente les erreurs. Les instruments sans gamma sont identifiés explicitement.
+| Schéma / support | Contenu | Écriture |
+|---|---|---|
+| PostgreSQL `legacy`, `modern` | `tape_trades`, `replay_symbols`, `gex` | Import initial uniquement |
+| PostgreSQL `simulation.records` | Trades simulés, séances sauvegardées, détails et échantillons de performance | Rôle `replay_writer` |
+| PostgreSQL `simulation.documents` | Point de reprise par espace navigateur | Rôle `replay_writer` |
+| PostgreSQL `public.market_imports` | Empreintes et nombre de ticks de chaque import | Import uniquement |
+| Fichiers `/market` | Archives d’import SQLite et catalogues JSON publics | Montage lecture seule |
+| Volume `/state` | Répertoires de visiteurs et caches de catalogues | Python ; aucune dépendance à ces caches pour les journaux PostgreSQL |
 
-Le cas ES → NQ à la même heure du 18 septembre a été reproduit sur la 1.0.1 (carte vide malgré une réponse API non vide). Quatre tests front supplémentaires couvrent ce correctif : 12 tests front au total.
+Toutes les requêtes de simulation filtrent l’espace visiteur et le type de document. Ce filtrage applicatif n’est pas une politique PostgreSQL RLS. Les cookies servent d’identifiants d’espace local, pas de comptes authentifiés. Le pool Python est partagé et borné ; il ne crée pas une connexion permanente pour chaque visiteur/thread.
 
+Les adaptateurs SQLite/JSONL restent dans les sources pour tests et développement sans PostgreSQL. Compose définit explicitement les DSN PostgreSQL : aucune bascule silencieuse vers SQLite en cas de panne. Les erreurs de dépendance doivent être visibles.
 
-## Profils historiques — 1.0.4
+## Import et redémarrage
 
-Le calcul pur `domain/replay/volume_profile.py` regroupe les volumes enregistrés en 32 tranches de prix, conserve leur somme et calcule un POC de tranche ainsi qu’une zone de valeur contiguë couvrant au moins 70 % du volume. `RegimesService` alimente le calcul par journée UTC et par bloc horaire ; les profils sont précalculés dans `regimes.json`. Le composant de présentation `VolumeProfile.svelte` affiche les mêmes données sur mobile et grand écran. Les profils du catalogue sont rétrospectifs (période complète), sans inventer les volumes manquants.
+L’import lit seulement les colonnes de marché autorisées des trois archives. Il ne copie ni table de comptes, ni événements de stratégie, ni trades personnels. Une transaction couvre chaque archive et ses index ; le marqueur n’est écrit qu’une fois l’import complet. Un verrou PostgreSQL empêche deux imports concurrents. Les empreintes incluent ticks et gamma ; un volume contenant un autre jeu de données est refusé, pas écrasé.
 
+Compose attend : PostgreSQL sain → import terminé → Go sain → Python sain → nginx. Le contrôle `/api/health` vérifie réellement PostgreSQL et Go et annonce `market=postgresql`, `ticks=go`, `journal=postgresql`. Le volume PostgreSQL conserve les exercices après retrait/recréation des conteneurs. `down -v` est destructif. Les journaux 1.1.0 ne sont pas migrés automatiquement.
 
-## Audit de maintenance — 1.0.5
+## Séparation du code
 
-Le build Docker assemblait auparavant seulement le runtime Python et copiait `frontend/dist` : une modification Svelte non compilée pouvait donc manquer dans l’image. Il construit désormais le front dans une étape Node distincte avec le lockfile, Svelte-check et génération automatique de la documentation. Le runtime conserve seulement Python et les fichiers web résultants. Le contexte Docker utilise une liste explicite : aucune archive, journal, configuration locale ou environnement de développement n’est envoyé au build.
+- `market-go/` : serveur HTTP Go, requête de ticks, validation et tests.
+- `database/` : schémas, rôles et droits initiaux PostgreSQL.
+- `scripts/import-market.py` : import strict et transactionnel.
+- `replay/backend/app/domain/` : calculs et états du simulateur.
+- `replay/backend/app/services/` : orchestration des fonctionnalités.
+- `replay/backend/app/repositories/` : adaptateurs PostgreSQL, Go, et adaptateurs locaux de tests.
+- `replay/backend/app/infra/` : pools, connexions et diffusion.
+- `replay/backend/app/bootstrap.py` : assemblage par espace visiteur.
+- `replay/backend/app/api/` : transport HTTP/WebSocket.
+- `replay/frontend/lib/` : domaine TypeScript, stores et composants Svelte.
+- `frontend/` : entrée et build Vite.
 
-La version publique est suivie dans Git. Les archives de marché sont distribuées
-séparément dans le paquet de release. Les espaces par cookie séparent les exercices
-locaux ; ils ne constituent pas une authentification multiutilisateur forte.
-Les images de base utilisent des tags : reproductibilité bit à bit non garantie.
-US500 n’est pas inclus dans cet instantané.
+Les couches et l’absence de cycles Python sont testées. Ce découpage ne constitue pas une certification SOLID.
 
-Les schémas de chargement, vitesse et stop à zéro refusent maintenant les valeurs non finies. Trois cas paramétrés vérifient Infinity, -Infinity et NaN avant appel au domaine. Les contrôles ont passé 53 tests Python et 12 tests front ; deux dépréciations de bibliothèques de test restent visibles.
+## Réseau et permissions
 
+PostgreSQL, import, Go et Python sont sur un réseau interne. nginx est relié à ce réseau et au réseau frontal ; son proxy a une destination fixe et son IP forwarding est désactivé. Seul son port localhost est publié. Le navigateur a une CSP same-origin et un contrôle Host/origine. Les images applicatives sont sans privilège, en lecture seule, sans capacités Linux ; PostgreSQL conserve les permissions nécessaires à son entrypoint et à son volume.
 
-## Vérification navigateur et développement — 1.0.6
+`market_reader` peut lire le marché mais ne peut ni le modifier ni lire les journaux. `replay_writer` peut écrire les exercices mais ne peut pas lire le marché. Le rôle administrateur est réservé à PostgreSQL et au conteneur d’import terminé. Les mots de passe de démonstration sont publics et locaux, sans lien avec les secrets du V2 privé.
 
-Le proxy Vite conserve désormais Host (`changeOrigin: false`) pour les requêtes API et WebSocket : les POST du mode développement ne sont plus rejetés par le contrôle same-origin. La protection du backend reste active. Le graphique indique explicitement le chargement de son historique ; les captures doivent attendre la réponse des bougies avant d’évaluer leur rendu. Le rendu des bougies, études, volumes et gamma a été vérifié après chargement.
+Les builds téléchargent les dépendances ; le fonctionnement historique ne dépend d’aucun fournisseur. Les images de base utilisent certains tags : une reconstruction bit à bit n’est pas garantie.
 
-## Distribution publique 1.1.0
+## Vérification
 
-Le journal et le graphique ne lisent plus les anciens trades réels. La route de ces
-trades, leurs marqueurs et leurs lecteurs ont été retirés. Même une archive contenant
-des transactions personnelles fictives en test ne les ajoute pas au journal simulé.
-Les archives publiques sont créées dans des fichiers neufs : tables de marché
-autorisées seulement, identifiants de ticks régénérés, aucune table de compte.
-Le réseau Docker est interne, le port est local et le navigateur utilise une CSP
-limitée aux ressources de l’instance. Les données de marché sont en lecture seule.
-
-Le lockfile impose `@types/estree` 1.0.9 : les dépendances demandaient une version
-1.1.0 absente du registre lors du contrôle. Svelte-check et le build valident cette
-configuration. Aucun client HTTP externe n’est installé dans le runtime.
-
-### Accès local au réseau isolé
-
-Le conteneur replay n’a pas de route par défaut. Une passerelle nginx publie
-uniquement le port localhost et transmet HTTP/WebSocket vers `replay:8080`.
-Le routage IP est désactivé dans la passerelle ; la destination du proxy est fixe.
-Cela conserve l’accès navigateur sans raccorder le moteur à un réseau externe.
-Voir la [documentation réseau Docker](https://docs.docker.com/engine/network/).
+Tests unitaires Python/TypeScript et Go ; tests d’intégration contre PostgreSQL réel : parité avec archives, gamma, lots Go avec timestamps identiques, permissions des rôles, persistance et séparation des espaces. Parcours navigateur : chargement, lecture/pause, ordre/clôture, journal, sauvegarde, performance et responsive. Test de redémarrage pour le journal et le point de reprise. Les fixtures CI sont synthétiques ; le paquet complet doit aussi être vérifié sur les archives distribuées.
