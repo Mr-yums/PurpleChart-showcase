@@ -1,0 +1,125 @@
+{
+  "version": "1.1.0",
+  "exported_at": "2026-09-18T20:20:32.355273+00:00",
+  "archives": [
+    {
+      "archive": "replay_archive.sqlite",
+      "symbol": "GC",
+      "ticks": 33289,
+      "first": 1784548703.056,
+      "last": 1785971146.412
+    },
+    {
+      "archive": "replay_archive.sqlite",
+      "symbol": "MES",
+      "ticks": 518477,
+      "first": 1784575061.76,
+      "last": 1788264604.368
+    },
+    {
+      "archive": "replay_archive.sqlite",
+      "symbol": "MGC",
+      "ticks": 3082273,
+      "first": 1784548702.192,
+      "last": 1788382799.996
+    },
+    {
+      "archive": "replay_archive.sqlite",
+      "symbol": "NQ",
+      "ticks": 9917204,
+      "first": 1784546289.676,
+      "last": 1788382799.976
+    },
+    {
+      "archive": "replay_archive.sqlite",
+      "symbol": "YM",
+      "ticks": 81340,
+      "first": 1785762180.196,
+      "last": 1788360283.824
+    },
+    {
+      "archive": "purplechart_v2_archive.sqlite",
+      "symbol": "ES",
+      "ticks": 753919,
+      "first": 1789697457.516,
+      "last": 1789760322.332
+    },
+    {
+      "archive": "purplechart_v2_archive.sqlite",
+      "symbol": "GC",
+      "ticks": 961055,
+      "first": 1788991200.476,
+      "last": 1789760313.132
+    },
+    {
+      "archive": "purplechart_v2_archive.sqlite",
+      "symbol": "MES",
+      "ticks": 411571,
+      "first": 1789697458.612,
+      "last": 1789760323.06
+    },
+    {
+      "archive": "purplechart_v2_archive.sqlite",
+      "symbol": "MGC",
+      "ticks": 1871545,
+      "first": 1788998400.036,
+      "last": 1789760321.372
+    },
+    {
+      "archive": "purplechart_v2_archive.sqlite",
+      "symbol": "MNQ",
+      "ticks": 10739896,
+      "first": 1788991200.028,
+      "last": 1789760323.304
+    },
+    {
+      "archive": "purplechart_v2_archive.sqlite",
+      "symbol": "MYM",
+      "ticks": 579323,
+      "first": 1788991200.188,
+      "last": 1789760322.32
+    },
+    {
+      "archive": "purplechart_v2_archive.sqlite",
+      "symbol": "NQ",
+      "ticks": 3286937,
+      "first": 1788904800.036,
+      "last": 1789760323.188
+    },
+    {
+      "archive": "purplechart_v2_archive.sqlite",
+      "symbol": "YM",
+      "ticks": 386775,
+      "first": 1788998400.148,
+      "last": 1789760322.256
+    }
+  ],
+  "gamma": {
+    "gex_qqq.db": {
+      "snapshots": 19465,
+      "first": "2025-12-24T13:03:33.681Z",
+      "last": "2026-09-03T16:21:50.673Z"
+    },
+    "purplechart_v2_archive.sqlite": {
+      "snapshots": 860,
+      "first": "2026-09-07T20:31:10Z",
+      "last": "2026-09-18T19:27:51Z"
+    }
+  },
+  "personal_trades": 0,
+  "private_signals": 0,
+  "files": {
+    "replay_archive.sqlite": {
+      "bytes": 1854533632,
+      "sha256": "c11ba3365518ef6cf9db2b5fd445cfb698f42f6d4f484e00b6362ac0116d9a75"
+    },
+    "purplechart_v2_archive.sqlite": {
+      "bytes": 2614034432,
+      "sha256": "e634599106d19efcb6215cae1489621c60fba8bb7d8e60680cca69afbd6ea7b7"
+    },
+    "gex_qqq.db": {
+      "bytes": 1986560,
+      "sha256": "db5699effc13bbfc3da67f833f134293913059c1c17ce7b660f47fb981772c01"
+    }
+  }
+}

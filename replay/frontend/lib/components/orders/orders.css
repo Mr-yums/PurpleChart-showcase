@@ -1,0 +1,20 @@
+/* [Sol] Never affect live styles after leaving Replay. */
+@scope (.replay-root) {
+/* Lignes d'ordre et ticket (dérivé de orders.css PurpleChart v2). Convention V1 conservée :
+   ENTRÉE = trait plein, SL/TP = pointillés. */
+.order-overlay{position:absolute;inset:0 84px 0 0;pointer-events:none;overflow:hidden;z-index:6}
+.order-price-line{position:absolute;width:100%;height:0;border-top:1px dashed #88a7e7;--level-color:#88a7e7}
+.order-price-line.stop{border-color:#f07f85;--level-color:#f07f85}
+.order-price-line.target{border-color:#5bc8ae;--level-color:#5bc8ae}
+.order-price-line.setup-buy{border-top:1px dashed #4da6ff;--level-color:#4da6ff}
+.order-price-line.setup-sell{border-top:1px dashed #ff9800;--level-color:#ff9800}
+.order-price-line.pending{border-top:1px dotted #9aa3af;--level-color:#9aa3af}
+.order-price-line.entry{z-index:4;border-top:2px solid #e8c14a;--level-color:#e8c14a;box-shadow:0 0 4px #e8c14a55}
+.order-price-line.outside{border-top-style:dotted}
+.order-price-label{position:absolute;left:10px;transform:translateY(-50%);font:11px system-ui;color:var(--level-color);background:#161820ee;border:1px solid var(--level-color);padding:3px 8px;border-radius:5px;font-variant-numeric:tabular-nums;pointer-events:auto;cursor:default;touch-action:none;white-space:nowrap}
+.order-price-label.draggable{cursor:ns-resize}
+.order-price-line.pnl-profit{--level-color:#73edc4;border-color:#73edc4}
+.order-price-line.pnl-loss{--level-color:#ff9696;border-color:#ff9696}
+.order-price-line.entry .order-price-label{font-weight:700}
+
+}

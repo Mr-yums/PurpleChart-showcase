@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "paths": {
+      "$replay/*": [
+        "../replay/frontend/lib/*"
+      ],
+      "$replay-ui/*": [
+        "../replay/frontend/*"
+      ],
+      "lightweight-charts": [
+        "./node_modules/lightweight-charts"
+      ]
+    },
+    "types": [
+      "vite/client"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.svelte",
+    "../replay/frontend/**/*.ts",
+    "../replay/frontend/**/*.svelte"
+  ]
+}

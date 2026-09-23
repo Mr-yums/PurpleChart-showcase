@@ -1,24 +1,29 @@
-# [Sol] Public demo checks only; no credentials or broker services.
-name: Demo checks
-on: [push, pull_request, workflow_dispatch]
+name: Replay quality
+on: [push, pull_request]
 permissions:
   contents: read
 jobs:
-  check:
+  replay:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-python@v5
         with:
-          go-version-file: go.mod
-          cache: false
-      - run: go test ./...
-      - run: docker build -t purplechart-demo .
-      - name: Verify isolated demo
-        shell: bash
+          python-version: '3.14'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: python -m venv .venv && .venv/bin/pip install -r replay/backend/requirements-dev.txt
+      - run: npm ci --prefix frontend
+      - run: scripts/check
+      - run: .venv/bin/python scripts/ci-data.py
+      - run: PURPLE_REPLAY_PORT=18948 docker compose -p purple-replay-ci up -d --build
+      - run: python scripts/check-install.py http://127.0.0.1:18948
+      - run: cd frontend && npx playwright install --with-deps chromium
+      - run: REPLAY_URL=http://127.0.0.1:18948 node scripts/check-browser.mjs
+      - name: Check runtime isolation
         run: |
-          docker network create showcase-test
-          docker run -d --name demo --network showcase-test --read-only --cap-drop ALL --security-opt no-new-privileges:true -p 127.0.0.1:8948:8080 purplechart-demo
-          trap 'docker rm -f demo; docker network rm showcase-test' EXIT
-          curl --retry 10 --retry-connrefused --retry-delay 1 --fail http://127.0.0.1:8948/healthz
-          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8948/api/orders)" = 404
+          docker compose -p purple-replay-ci exec -T replay python -c "import importlib.util; assert not importlib.util.find_spec('httpx'); assert not importlib.util.find_spec('pytest'); routes=open('/proc/net/route').readlines()[1:]; assert not any(r.split()[1]=='00000000' for r in routes)"
+      - name: Cleanup test installation
+        if: always()
+        run: docker compose -p purple-replay-ci down -v

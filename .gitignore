@@ -1,8 +1,14 @@
-# [Sol]
-.env*
-*.key
-*.pem
-*.log
+.venv/
+**/node_modules/
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+**/*.pyc
+frontend/dist/
+frontend/public/architecture.html
+releases/
+.env
+*.sqlite*
 *.db
-node_modules/
-/demo
+*.jsonl
+compose.override.yaml

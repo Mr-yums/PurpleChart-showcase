@@ -1,0 +1,27 @@
+/* [Sol] Never affect live styles after leaving Replay. */
+@scope (.replay-root) {
+/* DOM ladder */
+.dom{display:flex;flex-direction:column;height:100%;min-height:0;}
+.dom-imbalance{padding:0 0 6px;}
+.imb-bar{height:8px;border-radius:4px;overflow:hidden;background:#8a3630;}
+.imb-fill{height:100%;background:#1f6f52;transition:width .2s;}
+.imb-legend{display:flex;justify-content:space-between;font-size:10px;color:var(--text-2);margin-top:4px;}
+.imb-legend b{color:var(--text-0);}
+.dom-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--text-1);padding-bottom:4px;}
+.lad-head{display:grid;grid-template-columns:1fr 84px 1fr;font-size:10px;text-transform:uppercase;color:var(--text-2);padding:4px 0;border-bottom:1px solid var(--border);background:var(--bg-2);}
+.lad-head span:first-child{text-align:right;padding-right:10px;} .lad-head span:nth-child(2){text-align:center;} .lad-head span:last-child{padding-left:10px;}
+.dom-ladder{flex:1 1 auto;min-height:0;overflow:auto;font-family:var(--mono);font-variant-numeric:tabular-nums;}
+.dom-ladder .lad-row{display:grid;grid-template-columns:1fr 84px 1fr;align-items:center;height:20px;font-size:12px;border-bottom:1px solid var(--border-soft);}
+.dom-ladder .lad-bid,.dom-ladder .lad-ask{position:relative;height:100%;display:flex;align-items:center;overflow:hidden;}
+.dom-ladder .lad-bid{justify-content:flex-end;padding-right:10px;} .dom-ladder .lad-ask{justify-content:flex-start;padding-left:10px;}
+.dom-ladder .lad-bid .bar{position:absolute;right:0;top:2px;bottom:2px;background:#1f6f52;opacity:.42;border-radius:2px 0 0 2px;}
+.dom-ladder .lad-ask .bar{position:absolute;left:0;top:2px;bottom:2px;background:#8a3630;opacity:.42;border-radius:0 2px 2px 0;}
+.dom-ladder .sz{position:relative;z-index:1;font-weight:700;}
+.dom-ladder .lad-bid .sz{color:#8ae6be;} .dom-ladder .lad-ask .sz{color:#f4aaa2;}
+.dom-ladder .lad-px{text-align:center;color:var(--text-2);font-weight:700;border-inline:1px solid var(--border);height:100%;line-height:20px;}
+.dom-ladder .lad-row.best-bid .lad-px{color:#fff;background:rgba(47,180,116,.22);}
+.dom-ladder .lad-row.best-ask .lad-px{color:#fff;background:rgba(223,98,87,.22);}
+.dom-ladder .lad-row.mid{background:rgba(201,166,70,.07);} .dom-ladder .lad-row.mid .lad-px{color:var(--accent);}
+.dom-ladder .dom-empty{padding:24px 12px;text-align:center;color:var(--text-2);font-style:italic;}
+
+}

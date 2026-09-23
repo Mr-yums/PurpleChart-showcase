@@ -1,0 +1,362 @@
+[
+  {
+    "symbol": "ES",
+    "session_start": 1789682400,
+    "first_ts": 1789697457.516,
+    "last_ts": 1789760322.332,
+    "date": "2026-09-18",
+    "source": "v2"
+  },
+  {
+    "symbol": "GC",
+    "session_start": 1788991200,
+    "first_ts": 1788991200.476,
+    "last_ts": 1789073999.572,
+    "date": "2026-09-10",
+    "source": "v2"
+  },
+  {
+    "symbol": "GC",
+    "session_start": 1789077600,
+    "first_ts": 1789077600.748,
+    "last_ts": 1789160399.84,
+    "date": "2026-09-11",
+    "source": "v2"
+  },
+  {
+    "symbol": "GC",
+    "session_start": 1789336800,
+    "first_ts": 1789336800.696,
+    "last_ts": 1789419599.096,
+    "date": "2026-09-14",
+    "source": "v2"
+  },
+  {
+    "symbol": "GC",
+    "session_start": 1789423200,
+    "first_ts": 1789423200.544,
+    "last_ts": 1789505999.416,
+    "date": "2026-09-15",
+    "source": "v2"
+  },
+  {
+    "symbol": "GC",
+    "session_start": 1789509600,
+    "first_ts": 1789509600.636,
+    "last_ts": 1789592399.132,
+    "date": "2026-09-16",
+    "source": "v2"
+  },
+  {
+    "symbol": "GC",
+    "session_start": 1789596000,
+    "first_ts": 1789596000.74,
+    "last_ts": 1789678797.768,
+    "date": "2026-09-17",
+    "source": "v2"
+  },
+  {
+    "symbol": "GC",
+    "session_start": 1789682400,
+    "first_ts": 1789682400.54,
+    "last_ts": 1789760313.132,
+    "date": "2026-09-18",
+    "source": "v2"
+  },
+  {
+    "symbol": "MES",
+    "session_start": 1789682400,
+    "first_ts": 1789697458.612,
+    "last_ts": 1789760323.06,
+    "date": "2026-09-18",
+    "source": "v2"
+  },
+  {
+    "symbol": "MGC",
+    "session_start": 1788991200,
+    "first_ts": 1788998400.036,
+    "last_ts": 1789073998.792,
+    "date": "2026-09-10",
+    "source": "v2"
+  },
+  {
+    "symbol": "MGC",
+    "session_start": 1789077600,
+    "first_ts": 1789077600.54,
+    "last_ts": 1789160399.84,
+    "date": "2026-09-11",
+    "source": "v2"
+  },
+  {
+    "symbol": "MGC",
+    "session_start": 1789336800,
+    "first_ts": 1789336800.7,
+    "last_ts": 1789419599.804,
+    "date": "2026-09-14",
+    "source": "v2"
+  },
+  {
+    "symbol": "MGC",
+    "session_start": 1789423200,
+    "first_ts": 1789423200.536,
+    "last_ts": 1789505999.708,
+    "date": "2026-09-15",
+    "source": "v2"
+  },
+  {
+    "symbol": "MGC",
+    "session_start": 1789509600,
+    "first_ts": 1789509600.636,
+    "last_ts": 1789592399.516,
+    "date": "2026-09-16",
+    "source": "v2"
+  },
+  {
+    "symbol": "MGC",
+    "session_start": 1789596000,
+    "first_ts": 1789596000.436,
+    "last_ts": 1789678799.704,
+    "date": "2026-09-17",
+    "source": "v2"
+  },
+  {
+    "symbol": "MGC",
+    "session_start": 1789682400,
+    "first_ts": 1789682400.496,
+    "last_ts": 1789760321.372,
+    "date": "2026-09-18",
+    "source": "v2"
+  },
+  {
+    "symbol": "MNQ",
+    "session_start": 1788991200,
+    "first_ts": 1788991200.028,
+    "last_ts": 1789073999.872,
+    "date": "2026-09-10",
+    "source": "v2"
+  },
+  {
+    "symbol": "MNQ",
+    "session_start": 1789077600,
+    "first_ts": 1789077600.036,
+    "last_ts": 1789160399.712,
+    "date": "2026-09-11",
+    "source": "v2"
+  },
+  {
+    "symbol": "MNQ",
+    "session_start": 1789336800,
+    "first_ts": 1789336800.168,
+    "last_ts": 1789419599.364,
+    "date": "2026-09-14",
+    "source": "v2"
+  },
+  {
+    "symbol": "MNQ",
+    "session_start": 1789423200,
+    "first_ts": 1789426947.956,
+    "last_ts": 1789505998.048,
+    "date": "2026-09-15",
+    "source": "v2"
+  },
+  {
+    "symbol": "MNQ",
+    "session_start": 1789509600,
+    "first_ts": 1789509600.024,
+    "last_ts": 1789592399.8,
+    "date": "2026-09-16",
+    "source": "v2"
+  },
+  {
+    "symbol": "MNQ",
+    "session_start": 1789596000,
+    "first_ts": 1789596000.036,
+    "last_ts": 1789678799.516,
+    "date": "2026-09-17",
+    "source": "v2"
+  },
+  {
+    "symbol": "MNQ",
+    "session_start": 1789682400,
+    "first_ts": 1789682400.032,
+    "last_ts": 1789760323.304,
+    "date": "2026-09-18",
+    "source": "v2"
+  },
+  {
+    "symbol": "MYM",
+    "session_start": 1788991200,
+    "first_ts": 1788991200.188,
+    "last_ts": 1789073998.0,
+    "date": "2026-09-10",
+    "source": "v2"
+  },
+  {
+    "symbol": "MYM",
+    "session_start": 1789077600,
+    "first_ts": 1789077600.028,
+    "last_ts": 1789160397.004,
+    "date": "2026-09-11",
+    "source": "v2"
+  },
+  {
+    "symbol": "MYM",
+    "session_start": 1789336800,
+    "first_ts": 1789336800.192,
+    "last_ts": 1789419598.0,
+    "date": "2026-09-14",
+    "source": "v2"
+  },
+  {
+    "symbol": "MYM",
+    "session_start": 1789423200,
+    "first_ts": 1789426953.788,
+    "last_ts": 1789505998.156,
+    "date": "2026-09-15",
+    "source": "v2"
+  },
+  {
+    "symbol": "MYM",
+    "session_start": 1789509600,
+    "first_ts": 1789509600.052,
+    "last_ts": 1789592397.76,
+    "date": "2026-09-16",
+    "source": "v2"
+  },
+  {
+    "symbol": "MYM",
+    "session_start": 1789596000,
+    "first_ts": 1789596000.624,
+    "last_ts": 1789678799.016,
+    "date": "2026-09-17",
+    "source": "v2"
+  },
+  {
+    "symbol": "MYM",
+    "session_start": 1789682400,
+    "first_ts": 1789682400.072,
+    "last_ts": 1789760322.32,
+    "date": "2026-09-18",
+    "source": "v2"
+  },
+  {
+    "symbol": "NQ",
+    "session_start": 1788904800,
+    "first_ts": 1788904800.036,
+    "last_ts": 1788987599.008,
+    "date": "2026-09-09",
+    "source": "v2"
+  },
+  {
+    "symbol": "NQ",
+    "session_start": 1788991200,
+    "first_ts": 1788991200.02,
+    "last_ts": 1789073998.504,
+    "date": "2026-09-10",
+    "source": "v2"
+  },
+  {
+    "symbol": "NQ",
+    "session_start": 1789077600,
+    "first_ts": 1789077600.06,
+    "last_ts": 1789160399.036,
+    "date": "2026-09-11",
+    "source": "v2"
+  },
+  {
+    "symbol": "NQ",
+    "session_start": 1789336800,
+    "first_ts": 1789336800.172,
+    "last_ts": 1789419596.616,
+    "date": "2026-09-14",
+    "source": "v2"
+  },
+  {
+    "symbol": "NQ",
+    "session_start": 1789423200,
+    "first_ts": 1789426948.772,
+    "last_ts": 1789505999.36,
+    "date": "2026-09-15",
+    "source": "v2"
+  },
+  {
+    "symbol": "NQ",
+    "session_start": 1789509600,
+    "first_ts": 1789509600.024,
+    "last_ts": 1789592399.8,
+    "date": "2026-09-16",
+    "source": "v2"
+  },
+  {
+    "symbol": "NQ",
+    "session_start": 1789596000,
+    "first_ts": 1789596000.036,
+    "last_ts": 1789678799.712,
+    "date": "2026-09-17",
+    "source": "v2"
+  },
+  {
+    "symbol": "NQ",
+    "session_start": 1789682400,
+    "first_ts": 1789682400.032,
+    "last_ts": 1789760323.188,
+    "date": "2026-09-18",
+    "source": "v2"
+  },
+  {
+    "symbol": "YM",
+    "session_start": 1788991200,
+    "first_ts": 1788998400.148,
+    "last_ts": 1789073995.5,
+    "date": "2026-09-10",
+    "source": "v2"
+  },
+  {
+    "symbol": "YM",
+    "session_start": 1789077600,
+    "first_ts": 1789077600.028,
+    "last_ts": 1789160397.004,
+    "date": "2026-09-11",
+    "source": "v2"
+  },
+  {
+    "symbol": "YM",
+    "session_start": 1789336800,
+    "first_ts": 1789336800.212,
+    "last_ts": 1789419595.5,
+    "date": "2026-09-14",
+    "source": "v2"
+  },
+  {
+    "symbol": "YM",
+    "session_start": 1789423200,
+    "first_ts": 1789426954.98,
+    "last_ts": 1789505995.048,
+    "date": "2026-09-15",
+    "source": "v2"
+  },
+  {
+    "symbol": "YM",
+    "session_start": 1789509600,
+    "first_ts": 1789509601.836,
+    "last_ts": 1789592397.76,
+    "date": "2026-09-16",
+    "source": "v2"
+  },
+  {
+    "symbol": "YM",
+    "session_start": 1789596000,
+    "first_ts": 1789596000.284,
+    "last_ts": 1789678799.016,
+    "date": "2026-09-17",
+    "source": "v2"
+  },
+  {
+    "symbol": "YM",
+    "session_start": 1789682400,
+    "first_ts": 1789682401.004,
+    "last_ts": 1789760322.256,
+    "date": "2026-09-18",
+    "source": "v2"
+  }
+]

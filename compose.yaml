@@ -1,14 +1,25 @@
-# [Sol] Loopback by default; isolated runtime, no volumes or credentials.
+name: purple-replay
 services:
-  demo:
+  replay:
     build: .
+    image: purple-replay:1.1.0
     ports:
-      - "127.0.0.1:8948:8080"
-    read_only: true
-    user: "65532:65532"
-    cap_drop: [ALL]
-    security_opt: ["no-new-privileges:true"]
-    pids_limit: 32
-    mem_limit: 64m
-    cpus: 0.5
+      - "127.0.0.1:${PURPLE_REPLAY_PORT:-8948}:8080"
+    volumes:
+      - ./data:/market:ro
+      - journals:/state
     restart: unless-stopped
+    init: true
+    stop_grace_period: 60s
+    networks: [replay]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,noexec,size=128m
+networks:
+  replay:
+    driver: bridge
+    internal: true
+volumes:
+  journals:

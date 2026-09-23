@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$project_dir"
+export PYTHONPATH="$project_dir/replay/backend${PYTHONPATH:+:$PYTHONPATH}"
+.venv/bin/python -m pytest -q replay/backend/tests
+.venv/bin/ruff check replay/backend/app replay/backend/tests
+.venv/bin/ruff format --check replay/backend/app replay/backend/tests
+npm run check --prefix frontend
+node --test replay/frontend/tests/domain.test.cjs
+npm run build --prefix frontend

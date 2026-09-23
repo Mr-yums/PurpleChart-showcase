@@ -1,0 +1,33 @@
+/* [Sol] Replay controls inherit PurpleChart tokens; selectors stay in this feature. */
+@scope (.replay-root) {
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;white-space:nowrap;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text-0);background:var(--bg-2);transition:background .12s,border-color .12s;}
+.btn:hover{background:var(--bg-3);border-color:var(--accent-dim);}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn.primary{background:#7851bb;border-color:#9067ce;color:#fff;font-weight:600;}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--text-1);}.btn.quiet:hover{background:var(--bg-2);color:var(--text-0);}.btn.icon-button{width:30px;height:30px;min-height:30px;padding:0;background:transparent;border-color:transparent;}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+.btn.buy{color:#cffff0;border-color:rgba(38,166,154,.8);background:rgba(38,166,154,.18);}
+.btn.sell{color:#ffe1dc;border-color:rgba(239,83,80,.8);background:rgba(239,83,80,.18);}
+.btn.armed{color:#ffe1dc;border-color:rgba(239,83,80,.9);background:rgba(239,83,80,.32);}
+.btn.on{background:var(--accent-dim);border-color:var(--accent);color:#fff;}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:16px;padding:4px 11px;font-size:12px;color:var(--text-1);background:var(--bg-2);cursor:pointer;}
+.chip.on{color:#fff;background:var(--accent-dim);border-color:var(--accent);}
+.field{display:inline-flex;flex-direction:column;gap:4px;font-size:10px;color:var(--text-2);text-transform:uppercase;letter-spacing:.5px;}
+.field input,.field select{height:34px;min-width:80px;background:var(--bg-0);color:var(--text-0);border:1px solid var(--border);border-radius:7px;padding:0 8px;font-weight:600;font-variant-numeric:tabular-nums;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
+.note{padding:6px 0 0;font-size:10px;color:var(--text-2);font-style:italic;}
+.empty{padding:18px 10px;text-align:center;color:var(--text-2);font-style:italic;}
+.status-ok{color:#8ae6be;} .status-err{color:#f4aaa2;}
+.pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;border:1px solid var(--border);color:var(--text-1);background:var(--bg-2);}
+.pill.buy{color:#8ae6be;border-color:rgba(38,166,154,.6);} .pill.sell{color:#f4aaa2;border-color:rgba(239,83,80,.6);}
+.pill.live{color:#ff9b9b;border-color:#703c3c;background:#392020;}
+.pill.replay{color:#c7a1ff;border-color:#665087;}
+table.tbl{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;}
+table.tbl th{text-align:right;color:var(--text-2);font-weight:500;padding:7px 9px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-1);font-size:11px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+table.tbl th.l,table.tbl td.l{text-align:left;}
+table.tbl td{padding:6px 9px;border-bottom:1px solid var(--border-soft);white-space:nowrap;text-align:right;}
+table.tbl tbody tr:hover{background:var(--bg-2);}
+.tbox{max-height:520px;overflow:auto;border:1px solid var(--border);border-radius:12px;background:var(--bg-1);}
+
+}
+.replay-root {--buy:#308cff;--sell:#a855f7;--entry:#e8c14a;--sl:var(--down);--tp:var(--up);--be:#b57dff;--warn:#e9c474;min-height:0;height:100%;}

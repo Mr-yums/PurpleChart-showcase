@@ -1,0 +1,18 @@
+/* [Sol] Never affect live styles after leaving Replay. */
+@scope (.replay-root) {
+/* Tape */
+.tape{display:flex;flex-direction:column;height:100%;min-height:0;}
+.tape-stats{display:flex;justify-content:space-between;gap:8px;padding:0 0 6px;font-size:11px;color:var(--text-2);}
+.tape-stats b{font-size:13px;color:var(--text-0);margin-left:4px;}
+.tape-stats .buy b{color:#8ae6be;} .tape-stats .sell b{color:#f4aaa2;}
+.tape-head,.tape-list .tape-row{display:grid;grid-template-columns:64px 1fr 48px 22px;align-items:center;}
+.tape-head{font-size:10px;text-transform:uppercase;color:var(--text-2);padding:4px 8px;border-bottom:1px solid var(--border);background:var(--bg-2);}
+.tape-list{flex:1 1 auto;min-height:0;overflow:auto;font-family:var(--mono);font-variant-numeric:tabular-nums;}
+.tape-list .tape-row{height:19px;font-size:11px;padding:0 8px;border-bottom:1px solid var(--border-soft);}
+.tape-list .tp-time{color:var(--text-2);} .tape-list .tp-px{text-align:right;padding-right:8px;font-weight:700;} .tape-list .tp-sz{text-align:right;padding-right:6px;} .tape-list .tp-side{text-align:center;font-size:9px;}
+.tape-list .tape-row.buy .tp-px,.tape-list .tape-row.buy .tp-side{color:#8ae6be;}
+.tape-list .tape-row.sell .tp-px,.tape-list .tape-row.sell .tp-side{color:#f4aaa2;}
+.tape-list .tape-row.big{background:rgba(232,193,74,.10);} .tape-list .tape-row.big .tp-sz{color:var(--entry);font-weight:800;}
+.tape-list .tape-row.k-block{background:rgba(96,150,255,.16);} .tape-list .tape-row.k-sweep{background:rgba(232,193,74,.18);} .tape-list .tape-row.k-absorb{background:rgba(186,116,255,.18);}
+
+}
