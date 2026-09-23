@@ -2,6 +2,8 @@
 
 Clone autonome de la partie replay de PurpleChart V2 : entraînement sur des transactions futures historiques, avec compte et ordres simulés. Le code du moteur, du graphique, du journal et des outils de replay provient du module original, adapté pour Docker.
 
+![Replay sur une séance historique, compte simulé](docs/showcase.png)
+
 ## Utiliser
 
 1. Choisir une séance et une heure UTC, puis **Charger**.
